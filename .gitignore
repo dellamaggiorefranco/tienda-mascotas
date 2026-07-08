@@ -1,0 +1,19 @@
+# Entornos
+.env
+*.local
+
+# Node / Next.js (frontend)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Java / Maven (backend) - ver también backend/.gitignore
+backend/target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
