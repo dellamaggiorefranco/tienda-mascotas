@@ -16,9 +16,9 @@
 
 **Tareas:**
 
-- [ ] Crear repositorio con la estructura definida en `CODING_STANDARDS.md` (`backend/`, `frontend/`, `docs/`).
-- [ ] Backend: proyecto Spring Boot inicial (`pom.xml`, `application.properties`, conexión a PostgreSQL vía Docker Compose).
-- [ ] Backend: primera migración Flyway — tabla `users` con los campos comunes (`id`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `tenantId`) más `email`, `passwordHash`, `role`.
+- [x] Crear repositorio con la estructura definida en `CODING_STANDARDS.md` (`backend/`, `frontend/`, `docs/`).
+- [x] Backend: proyecto Spring Boot inicial (`pom.xml`, `application.properties`, conexión a PostgreSQL vía Docker Compose).
+- [x] Backend: primera migración Flyway — tabla `users` con los campos comunes (`id`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `tenantId`) más `email`, `passwordHash`, `role`.
 - [ ] Backend: módulo `auth` — registro (`POST /api/v1/auth/register`) y login (`POST /api/v1/auth/login`) con JWT, siguiendo la estructura de módulo de `ARCHITECTURE.md` (controller/service/repository/entity/dto/mapper/validator/exception).
 - [ ] Backend: Spring Security configurado, contraseñas con BCrypt, validación de entrada en ambos endpoints.
 - [ ] Backend: Swagger habilitado y documentando los dos endpoints.

@@ -71,3 +71,13 @@ Contexto: Se necesita enviar recordatorios de recompra por WhatsApp (ver ADR-002
 Decisión: A definir — evaluar WhatsApp Business API directa vs. intermediario (ej. Twilio).
 Alternativas consideradas: Pendiente.
 Consecuencias: Pendiente.
+
+---
+
+## ADR-009: Límite entre los módulos `users` y `auth`
+Estado: Aceptada
+Fecha: 2026-07-08
+Contexto: `ARCHITECTURE.md` y `DOMAIN.md` no aclaraban en qué módulo vive la entidad `User`, y el repo tiene carpetas paralelas `modules/auth/` y `modules/users/` con la misma subestructura (controller/service/repository/entity/dto/mapper/validator/exception). Sin definir esto antes de escribir código, era fácil terminar con la entidad `User` duplicada o con `auth` accediendo directo a un repository ajeno, violando la regla de `ARCHITECTURE.md` de nunca cruzar repositories entre módulos.
+Decisión: El módulo `users` es dueño de la entidad `User`, su `UserRepository` y su `UserService` (crear, buscar por email, etc.). El módulo `auth` no tiene entidad propia: su `AuthService` orquesta registro y login llamando al `UserService` de `users` (nunca a su repository), y se encarga del hash de contraseñas y de la emisión/validación de JWT.
+Alternativas consideradas: Poner la entidad `User` dentro de `auth`, descartada porque otros módulos futuros (`pets`, `orders`, `reviews`) necesitan referenciar al usuario dueño de un recurso, y esa relación pertenece naturalmente a `users`, no a `auth`.
+Consecuencias: `auth` queda como módulo delgado, enfocado solo en autenticación (credenciales, tokens). Cualquier lógica de cuenta de usuario que no sea puramente de login/registro (por ejemplo, cambiar el propio email) va en `users`, no en `auth`.
