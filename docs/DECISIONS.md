@@ -81,3 +81,13 @@ Contexto: `ARCHITECTURE.md` y `DOMAIN.md` no aclaraban en qué módulo vive la e
 Decisión: El módulo `users` es dueño de la entidad `User`, su `UserRepository` y su `UserService` (crear, buscar por email, etc.). El módulo `auth` no tiene entidad propia: su `AuthService` orquesta registro y login llamando al `UserService` de `users` (nunca a su repository), y se encarga del hash de contraseñas y de la emisión/validación de JWT.
 Alternativas consideradas: Poner la entidad `User` dentro de `auth`, descartada porque otros módulos futuros (`pets`, `orders`, `reviews`) necesitan referenciar al usuario dueño de un recurso, y esa relación pertenece naturalmente a `users`, no a `auth`.
 Consecuencias: `auth` queda como módulo delgado, enfocado solo en autenticación (credenciales, tokens). Cualquier lógica de cuenta de usuario que no sea puramente de login/registro (por ejemplo, cambiar el propio email) va en `users`, no en `auth`.
+
+---
+
+## ADR-010: Refresh token JWT stateless (sin persistencia ni revocación)
+Estado: Aceptada
+Fecha: 2026-07-10
+Contexto: `DOMAIN.md` exige JWT con expiración corta + refresh token. Al diseñar el módulo `auth`, había que decidir cómo implementar ese refresh token (a construirse en la tarea inmediata siguiente a esta, que cubre solo registro y login).
+Decisión: El refresh token, cuando se implemente, va a ser también un JWT firmado (más largo que el access token, usando `refresh-expiration-days` ya configurado en `application.yml`), diferenciado del access token por un claim de tipo (`type: "refresh"`). No se persiste en base de datos: no hay tabla `refresh_tokens`, ni entidad, ni repository nuevo en el módulo `auth`.
+Alternativas consideradas: Persistir el refresh token en una tabla propia, lo que permitiría revocar sesiones puntuales (logout real del lado servidor, invalidar un token robado sin esperar su expiración natural). Se descartó por ahora porque suma una migración Flyway, una entidad y un repository nuevos al alcance ya grande de esta tarea (primera vez que se implementa Security + JWT en el proyecto), lo cual va contra el principio de simplicidad de esta etapa (ver `PROJECT_BIBLE.md`).
+Consecuencias: Se gana simplicidad — no hay estado de sesión en el servidor, nada que persistir ni limpiar. Se pierde la capacidad de invalidar un refresh token puntual antes de que expire (7 días por default): si un token se compromete, no hay forma de anularlo sin rotar el secreto de firma para todos los usuarios. Aceptable para el MVP de un solo tenant en etapa de validación; a reevaluar si aparece un requisito real de "cerrar sesión en todos los dispositivos" o si el negocio escala.
