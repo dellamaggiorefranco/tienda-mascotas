@@ -19,7 +19,7 @@
 - [x] Crear repositorio con la estructura definida en `CODING_STANDARDS.md` (`backend/`, `frontend/`, `docs/`).
 - [x] Backend: proyecto Spring Boot inicial (`pom.xml`, `application.properties`, conexión a PostgreSQL vía Docker Compose).
 - [x] Backend: primera migración Flyway — tabla `users` con los campos comunes (`id`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `tenantId`) más `email`, `passwordHash`, `role`.
-- [x] Backend: módulo `auth` — registro (`POST /api/v1/auth/register`) y login (`POST /api/v1/auth/login`) con JWT, siguiendo la estructura de módulo de `ARCHITECTURE.md` (controller/service/repository/entity/dto/mapper/validator/exception).
+- [x] Backend: módulo `auth` — registro (`POST /api/v1/auth/register`), login (`POST /api/v1/auth/login`) y refresh (`POST /api/v1/auth/refresh`) con JWT, siguiendo la estructura de módulo de `ARCHITECTURE.md` (controller/service/repository/entity/dto/mapper/validator/exception).
 - [x] Backend: Spring Security configurado, contraseñas con BCrypt, validación de entrada en ambos endpoints.
 - [x] Backend: Swagger habilitado y documentando los dos endpoints.
 - [x] Backend: tests unitarios de `AuthService` (JUnit + Mockito).
@@ -35,7 +35,6 @@
 
 Referencia rápida — el detalle vive en `ROADMAP.md`:
 
-- `POST /api/v1/auth/refresh` — tarea chica, inmediata siguiente a "módulo auth (registro + login)" de Sprint 1. Reutiliza `JwtService`; ver ADR-010 (refresh token JWT stateless, sin tabla ni revocación).
 - Rate limiting en `/login` y `/checkout` — exigido como regla obligatoria en `DOMAIN.md`, diferido explícitamente del alcance de la tarea de `auth` de Sprint 1 por tamaño (requiere evaluar una librería nueva, ej. Bucket4j, no agregada todavía al proyecto).
 - `AuthIntegrationTest` (Testcontainers) no corre en la máquina de desarrollo de Franco: el Docker Desktop instalado (motor con API 1.55, arquitectura Moby v2) todavía no es compatible con la librería Testcontainers Java (probado 1.19.8 y 1.20.4), incluso exponiendo el daemon por TCP. El test está escrito y compila; falta poder ejecutarlo (en esta máquina cuando Testcontainers lo soporte, o en CI con una versión de Docker más estándar).
 - Pendientes menores detectados en la revisión cruzada del módulo `auth` (no bloquean el merge):

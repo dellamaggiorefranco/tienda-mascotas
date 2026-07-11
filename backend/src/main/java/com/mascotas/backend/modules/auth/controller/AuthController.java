@@ -3,6 +3,8 @@ package com.mascotas.backend.modules.auth.controller;
 import com.mascotas.backend.common.response.ErrorResponse;
 import com.mascotas.backend.modules.auth.dto.LoginRequest;
 import com.mascotas.backend.modules.auth.dto.LoginResponse;
+import com.mascotas.backend.modules.auth.dto.RefreshRequest;
+import com.mascotas.backend.modules.auth.dto.RefreshResponse;
 import com.mascotas.backend.modules.auth.dto.RegisterRequest;
 import com.mascotas.backend.modules.auth.dto.RegisterResponse;
 import com.mascotas.backend.modules.auth.service.AuthService;
@@ -63,5 +65,21 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @Operation(summary = "Renovar el access token",
+            description = "Recibe un refresh token valido y devuelve un access token nuevo.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Access token renovado"),
+            @ApiResponse(responseCode = "400", description = "Datos de entrada invalidos",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Refresh token invalido, expirado o de tipo incorrecto",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(authService.refresh(request));
     }
 }
