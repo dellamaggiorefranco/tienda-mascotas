@@ -18,7 +18,7 @@ class JwtServiceTest {
 
     @BeforeEach
     void setUp() {
-        jwtService = new JwtService(new JwtProperties(TEST_SECRET, 15));
+        jwtService = new JwtService(new JwtProperties(TEST_SECRET, 15, 7));
     }
 
     @Test
@@ -34,7 +34,7 @@ class JwtServiceTest {
 
     @Test
     void expiredTokenThrowsInvalidTokenException() {
-        JwtService expiredJwtService = new JwtService(new JwtProperties(TEST_SECRET, -1));
+        JwtService expiredJwtService = new JwtService(new JwtProperties(TEST_SECRET, -1, 7));
         String token = expiredJwtService.generateAccessToken("juan@example.com", UserRole.CUSTOMER);
 
         assertThrows(InvalidTokenException.class, () -> expiredJwtService.parseToken(token));
@@ -46,5 +46,24 @@ class JwtServiceTest {
         String tampered = token.substring(0, token.length() - 1) + (token.endsWith("A") ? "B" : "A");
 
         assertThrows(InvalidTokenException.class, () -> jwtService.parseToken(tampered));
+    }
+
+    @Test
+    void generateAndParseRefreshToken() {
+        String token = jwtService.generateRefreshToken("juan@example.com");
+
+        Claims claims = jwtService.parseToken(token);
+
+        assertEquals("juan@example.com", jwtService.extractEmail(claims));
+        assertEquals(true, jwtService.isRefreshToken(claims));
+    }
+
+    @Test
+    void isRefreshTokenIsFalseForAccessToken() {
+        String token = jwtService.generateAccessToken("juan@example.com", UserRole.CUSTOMER);
+
+        Claims claims = jwtService.parseToken(token);
+
+        assertEquals(false, jwtService.isRefreshToken(claims));
     }
 }

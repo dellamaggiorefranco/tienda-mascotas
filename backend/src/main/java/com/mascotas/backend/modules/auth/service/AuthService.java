@@ -2,13 +2,17 @@ package com.mascotas.backend.modules.auth.service;
 
 import com.mascotas.backend.modules.auth.dto.LoginRequest;
 import com.mascotas.backend.modules.auth.dto.LoginResponse;
+import com.mascotas.backend.modules.auth.dto.RefreshRequest;
+import com.mascotas.backend.modules.auth.dto.RefreshResponse;
 import com.mascotas.backend.modules.auth.dto.RegisterRequest;
 import com.mascotas.backend.modules.auth.dto.RegisterResponse;
 import com.mascotas.backend.modules.auth.exception.InvalidCredentialsException;
+import com.mascotas.backend.modules.auth.exception.InvalidTokenException;
 import com.mascotas.backend.modules.users.entity.User;
 import com.mascotas.backend.modules.users.entity.UserRole;
 import com.mascotas.backend.modules.users.exception.UserNotFoundException;
 import com.mascotas.backend.modules.users.service.UserService;
+import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,6 +57,26 @@ public class AuthService {
         log.info("Login exitoso: {}", user.getEmail());
 
         String accessToken = jwtService.generateAccessToken(user.getEmail(), user.getRole());
-        return new LoginResponse(accessToken, "Bearer", jwtService.getAccessTokenExpirationSeconds());
+        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+        return new LoginResponse(accessToken, refreshToken, "Bearer", jwtService.getAccessTokenExpirationSeconds());
+    }
+
+    public RefreshResponse refresh(RefreshRequest request) {
+        Claims claims = jwtService.parseToken(request.refreshToken());
+
+        if (!jwtService.isRefreshToken(claims)) {
+            throw new InvalidTokenException();
+        }
+
+        String email = jwtService.extractEmail(claims);
+        User user;
+        try {
+            user = userService.findByEmail(email);
+        } catch (UserNotFoundException ex) {
+            throw new InvalidTokenException();
+        }
+
+        String accessToken = jwtService.generateAccessToken(user.getEmail(), user.getRole());
+        return new RefreshResponse(accessToken, "Bearer", jwtService.getAccessTokenExpirationSeconds());
     }
 }
